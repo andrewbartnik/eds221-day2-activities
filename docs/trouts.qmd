@@ -1,0 +1,68 @@
+---
+title: "wild data"
+format: html
+editor: visual
+execute: 
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+mack_verts <- read_csv(here("data", "AS00601.csv")) %>% clean_names()
+
+mack_verts
+
+```
+
+```{r}
+mc_wt_5 <- mack_verts$weight[5]
+
+mc_length_8_20 <- mack_verts$length1[8 : 20]
+
+mc_dates <- mack_verts$sampledate
+
+```
+
+## Salamander subset
+
+```{r}
+mc_salamanders <- mack_verts %>% filter(species == "DITE")
+
+mc_salamanders
+
+salamander_size <- ggplot(mc_salamanders, aes(x = length1, y = weight)) + geom_point(color = "blue", alpha = 0.6, size = 1) + labs(title = "Salamander weight (g) vs length (cm)",
+                                                                           
+                                                                           x = "length (cm)", 
+                                                                           y = "weight (grams)", caption = "dataframe practice with some salamanders. Data from Mack creek salamanders & cutthroat trout data set") + 
+  theme_dark() 
+
+ggsave(here("figs", "salamander_size.png"))
+
+```
+
+## Cutthroat Plot
+
+```{r}
+mc_trout <- mack_verts %>%  filter(species == "ONCL")
+
+c <- scale_color_gradient(low = "blue", high = "red")
+
+plot_1 <- ggplot(mc_trout, aes(x = length1, y = weight)) +geom_point(aes(color = mc_trout$weight)) + scale_color_gradient(low = "blue", high = "red")
+
+plot_actual <- ggplot(mc_trout, aes(x = length1, y = weight, color = reach)) + geom_point() + scale_color_manual(values = c("blue", "red", "black"))
+
+plot_new <- plot_actual + facet_wrap(~reach)
+cutthroat_size <- plot_new + labs(x = "length (cm)", y = "weight (g)",
+                title = "Trout weight (g) vs length (cm) faceted by creek reach")
+ggsave(here("figs", "cutthroat_size.png"))
+
+plot_1
+
+cutthroat_size
+```
